@@ -1,10 +1,7 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-
 # #########################################################################
-# Copyright (c) 2015, UChicago Argonne, LLC. All rights reserved.         #
+# Copyright (c) 2018, UChicago Argonne, LLC. All rights reserved.         #
 #                                                                         #
-# Copyright 2015. UChicago Argonne, LLC. This software was produced       #
+# Copyright 2018. UChicago Argonne, LLC. This software was produced       #
 # under U.S. Government contract DE-AC02-06CH11357 for Argonne National   #
 # Laboratory (ANL), which is operated by UChicago Argonne, LLC for the    #
 # U.S. Department of Energy. The U.S. Government has rights to use,       #
@@ -46,4 +43,64 @@
 # POSSIBILITY OF SUCH DAMAGE.                                             #
 # #########################################################################
 
-from __future__ import absolute_import, division, print_function
+
+from PyQt5 import QtCore
+from PyQt5.QtCore import pyqtSignal
+import pyqtgraph
+import xrftomo
+
+class differenceView(pyqtgraph.GraphicsLayoutWidget):
+    keyPressSig = pyqtSignal(str, name= 'keyPressSig')
+
+    def __init__(self):
+    # def __init__(self, parent):
+        super(differenceView, self).__init__()
+        self.keylist = []
+        self.initUI()
+
+    def initUI(self):
+        custom_vb = xrftomo.CustomViewBox()
+        self.p1 = self.addPlot(viewBox = custom_vb, enableMouse = False)
+        self.projView = pyqtgraph.ImageItem()
+        self.projView.rotate(-90)
+        self.p1.addItem(self.projView)
+        self.p1.vb = custom_vb
+
+    def wheelEvent(self, ev):
+        #empty function, but leave it as it overrides some other unwanted functionality.
+        pass
+
+    def keyPressEvent(self, ev):
+        self.firstrelease = True
+        astr = ev.key()
+        self.keylist.append(astr)
+
+    def keyReleaseEvent(self, ev):
+        if self.firstrelease == True:
+            self.processMultipleKeys(self.keylist)
+
+        self.firstrelease = False
+
+        try:    #complains about an index error for some reason.
+            del self.keylist[-1]
+        except:
+            pass
+        return
+
+    def processMultipleKeys(self, keyspressed):
+        if len(keyspressed) ==1:
+            if keyspressed[0]== QtCore.Qt.Key_Left:
+                self.keyPressSig.emit('left')
+            if keyspressed[0] == QtCore.Qt.Key_Right:
+                self.keyPressSig.emit('right')
+            if keyspressed[0] == QtCore.Qt.Key_Up:
+                self.keyPressSig.emit('up')
+            if keyspressed[0] == QtCore.Qt.Key_Down:
+                self.keyPressSig.emit('down')
+            if keyspressed[0] == QtCore.Qt.Key_A:
+                self.keyPressSig.emit('A')
+            if keyspressed[0] == QtCore.Qt.Key_D:
+                self.keyPressSig.emit('D')
+        if len(keyspressed) >=2:
+            self.keylist = []
+            return

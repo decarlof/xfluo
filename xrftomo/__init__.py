@@ -55,6 +55,7 @@ from xrftomo.file_io.writer import *
 from xrftomo.reco import *
 from xrftomo.elements import *
 from xrftomo.widgets.custom_view_box import *
+from xrftomo.widgets.difference_view import *
 
 from xrftomo.models.element_table import *
 from xrftomo.models.file_table import *
